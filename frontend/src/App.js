@@ -41,13 +41,13 @@ function App() {
       const token = localStorage.getItem("token");
 
       const [resumeResponse, jobResponse] = await Promise.all([
-        fetch("http://localhost:5050/api/resumes", {
+        fetch("https://resumefit-ai-36t5.onrender.com/api/resumes", {
           headers: {
             Authorization: `Bearer ${token}`
           }
         }),
 
-        fetch("http://localhost:5050/api/jobs", {
+        fetch("https://resumefit-ai-36t5.onrender.com/api/jobs", {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -100,7 +100,7 @@ function App() {
 
     try {
       const response = await fetch(
-        "http://localhost:5050/api/resumes",
+        "https://resumefit-ai-36t5.onrender.com/api/resumes",
         {
           method: "POST",
           headers: {
@@ -149,7 +149,7 @@ function App() {
 
     try {
       const response = await fetch(
-        `http://localhost:5050/api/resumes/${editingResumeId}`,
+        `https://resumefit-ai-36t5.onrender.com/api/resumes/${editingResumeId}`,
         {
           method: "PUT",
           headers: {
@@ -236,7 +236,7 @@ function App() {
 
     try {
       const response = await fetch(
-        "http://localhost:5050/api/jobs",
+        "https://resumefit-ai-36t5.onrender.com/api/jobs",
         {
           method: "POST",
           headers: {
@@ -294,7 +294,7 @@ function App() {
 
     try {
       const response = await fetch(
-        "http://localhost:5050/api/jobs/match",
+        "https://resumefit-ai-36t5.onrender.com/api/jobs/match",
         {
           method: "POST",
           headers: {

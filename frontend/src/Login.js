@@ -8,7 +8,7 @@ function Login() {
   async function handleLogin() {
     try {
       const response = await fetch(
-        "http://localhost:5050/api/auth/login",
+        "https://resumefit-ai-36t5.onrender.com/api/auth/login/api/auth/login",
         {
           method: "POST",
           headers: {
