@@ -8,8 +8,7 @@ function Login() {
   async function handleLogin() {
     try {
       const response = await fetch(
-        "https://resumefit-ai-36t5.onrender.com/api/auth/login/api/auth/login",
-        {
+        "https://resumefit-ai-36t5.onrender.com/api/auth/login",        {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
