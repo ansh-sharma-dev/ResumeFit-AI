@@ -9,8 +9,7 @@ function Register() {
   async function handleRegister() {
     try {
       const response = await fetch(
-        "https://resumefit-ai-36t5.onrender.com/api/auth/register/api/auth/register",
-        {
+        "https://resumefit-ai-36t5.onrender.com/api/auth/register",        {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
