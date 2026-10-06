@@ -342,7 +342,6 @@ const improveResumeForJob = async (
     missingSkills,
     missingKeywords
 ) => {
-
     const prompt = `
 Suggest practical improvements for a candidate's resume based on a job description.
 
@@ -350,45 +349,93 @@ Candidate Resume:
 ${JSON.stringify(resumeData)}
 
 Job Requirements:
-Required Skills: ${jobAnalysis.requiredSkills.join(", ")}
-Preferred Skills: ${jobAnalysis.preferredSkills.join(", ")}
-Keywords: ${jobAnalysis.keywords.join(", ")}
-Experience: ${jobAnalysis.experience}
-Education: ${jobAnalysis.education}
+Required Skills: ${(jobAnalysis.requiredSkills || []).join(", ")}
+Preferred Skills: ${(jobAnalysis.preferredSkills || []).join(", ")}
+Keywords: ${(jobAnalysis.keywords || []).join(", ")}
+Experience: ${jobAnalysis.experience || ""}
+Education: ${jobAnalysis.education || ""}
 
 Missing Skills:
-${missingSkills.join(", ")}
+${(missingSkills || []).join(", ")}
 
 Missing Keywords:
-${missingKeywords.join(", ")}
+${(missingKeywords || []).join(", ")}
 
-Return ONLY a valid JSON object in this format:
-
+Return ONLY a valid JSON object:
 {
   "suggestions": []
 }
 
 Rules:
-- Suggest adding missing keywords only when they are relevant and truthful to the candidate's actual experience.
-- suggestions must be an array of strings.
-- Give practical resume improvement suggestions.
-- Do not invent candidate experience or skills.
-- Do not tell the candidate to add a skill if the resume does not show evidence of that skill.
-- Focus on improving resume wording, projects, skills, keywords, and relevant experience.
-- Keep suggestions specific to this job.
-- Return 3 to 5 useful suggestions.
-- Do not return markdown.
+- Return 3 to 5 practical, job-specific suggestions.
+- Suggest keywords only when relevant and truthful.
+- Never invent candidate skills or experience.
+- Focus on resume wording, projects, skills, and relevant experience.
+- Return JSON only, without markdown.
 `;
 
-    const response = await client.models.generateContent({
-        model: "gemini-3.8-flash",
-        contents: prompt,
-        config: {
-            responseMimeType: "application/json"
-        }
-    });
+    const fallbackSuggestions = [
+        "Tailor your resume summary to the requirements of this job.",
+        "Highlight relevant projects and explain your personal contribution.",
+        "Include missing keywords only where they truthfully match your experience."
+    ];
 
-    return JSON.parse(response.text);
+    const maxRetries = 3;
+
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+            const response = await client.models.generateContent({
+                model: "gemini-3.8-flash",
+                contents: prompt,
+                config: {
+                    responseMimeType: "application/json"
+                }
+            });
+
+            const result = JSON.parse(response.text);
+
+            if (
+                !Array.isArray(result.suggestions) ||
+                result.suggestions.length === 0 ||
+                !result.suggestions.every(
+                    suggestion => typeof suggestion === "string"
+                )
+            ) {
+                throw new Error("Invalid AI suggestions response");
+            }
+
+            return result;
+        } catch (error) {
+            console.error(
+                `Resume improvement attempt ${attempt} failed:`,
+                error.message
+            );
+
+            const isTemporaryError =
+                error.message?.includes("503") ||
+                error.message?.includes("UNAVAILABLE") ||
+                error.message?.includes("429") ||
+                error.message?.includes("RESOURCE_EXHAUSTED");
+
+            if (!isTemporaryError || attempt === maxRetries) {
+                return {
+                    suggestions: fallbackSuggestions
+                };
+            }
+
+            const delay = 2000 * Math.pow(2, attempt - 1);
+
+            console.log(
+                `Retrying resume improvement in ${delay / 1000} seconds...`
+            );
+
+            await new Promise(resolve => setTimeout(resolve, delay));
+        }
+    }
+
+    return {
+        suggestions: fallbackSuggestions
+    };
 };
 
 module.exports = {

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import html2pdf from "html2pdf.js";
 import "./App.css";
+import API_URL from "./api";
 import Navbar from "./components/Navbar";
 
 function App() {
@@ -41,13 +42,13 @@ function App() {
       const token = localStorage.getItem("token");
 
       const [resumeResponse, jobResponse] = await Promise.all([
-        fetch("https://resumefit-ai-36t5.onrender.com/api/resumes", {
+        fetch(`${API_URL}/api/resumes`,{
           headers: {
             Authorization: `Bearer ${token}`
           }
         }),
 
-        fetch("https://resumefit-ai-36t5.onrender.com/api/jobs", {
+        fetch(`${API_URL}/api/jobs`, {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -59,6 +60,10 @@ function App() {
 
       if (resumeResponse.ok) {
         setSavedResumes(resumeData.resumes || []);
+      
+        if (resumeData.resumes && resumeData.resumes.length > 0) {
+          setAtsResult(resumeData.resumes[0].aiAnalysis);
+        }
       }
 
       if (jobResponse.ok) {
@@ -100,8 +105,7 @@ function App() {
 
     try {
       const response = await fetch(
-        "https://resumefit-ai-36t5.onrender.com/api/resumes",
-        {
+      `${API_URL}/api/resumes`,{
           method: "POST",
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`
@@ -113,6 +117,7 @@ function App() {
       const data = await response.json();
 
       console.log(data);
+      console.log("AI ANALYSIS FROM RESPONSE:", data.resume.aiAnalysis);
 
       if (!response.ok) {
         alert(data.message || "Upload failed");
@@ -149,7 +154,7 @@ function App() {
 
     try {
       const response = await fetch(
-        `https://resumefit-ai-36t5.onrender.com/api/resumes/${editingResumeId}`,
+        `${API_URL}/api/resumes/${editingResumeId}`,
         {
           method: "PUT",
           headers: {
@@ -236,7 +241,7 @@ function App() {
 
     try {
       const response = await fetch(
-        "https://resumefit-ai-36t5.onrender.com/api/jobs",
+        `${API_URL}/api/jobs`,
         {
           method: "POST",
           headers: {
@@ -294,7 +299,7 @@ function App() {
 
     try {
       const response = await fetch(
-        "https://resumefit-ai-36t5.onrender.com/api/jobs/match",
+        `${API_URL}/api/jobs/match`,
         {
           method: "POST",
           headers: {
