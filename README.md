@@ -1,5 +1,5 @@
 # ResumeFit AI
-
+![ResumeFit AI Preview](./ResumeFitAi.png)
 > AI-powered ATS Resume & Job Matching platform built with React,
 > Node.js, Express, MongoDB, and Google Gemini.
 
